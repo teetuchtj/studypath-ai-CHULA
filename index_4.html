@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyPath AI — ผู้ช่วยนักเรียนไทย</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #f0f0ff;
+    --muted: #8888aa;
+    --card-glow: 0 0 40px rgba(108,99,255,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(108,99,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(255,101,132,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 40% at 60% 10%, rgba(67,233,123,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    padding: 3rem 0 2.5rem;
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 99px;
+    padding: 0.4rem 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  .logo-badge::before {
+    content: '●';
+    color: var(--accent3);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 0.8rem;
+    background: linear-gradient(135deg, #fff 0%, rgba(108,99,255,0.9) 60%, #ff6584 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 300;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.4rem;
+    margin-bottom: 2rem;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Noto Sans Thai', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .tab:hover { color: var(--text); background: var(--surface2); }
+
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--card-glow);
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .card-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+  }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  textarea, input, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    color: var(--text);
+    font-family: 'Noto Sans Thai', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    margin-bottom: 1rem;
+  }
+
+  textarea:focus, input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+  }
+
+  textarea { resize: vertical; min-height: 130px; }
+  select option { background: var(--surface2); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+
+  .chip {
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans Thai', sans-serif;
+    user-select: none;
+  }
+
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip.selected { background: rgba(108,99,255,0.2); border-color: var(--accent); color: var(--accent); }
+
+  .btn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #9b59b6);
+    color: #fff;
+    font-family: 'Noto Sans Thai', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    min-height: 52px;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(108,99,255,0.5);
+  }
+
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .loader {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-box {
+    margin-top: 1.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .result-box.show { display: block; }
+
+  .result-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .result-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+  }
+
+  .result-content {
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    font-weight: 300;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .tcas-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .step-info { flex: 1; }
+  .step-name { font-weight: 600; font-size: 0.9rem; }
+  .step-detail { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .grade-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  @media(max-width: 480px) { .grade-grid { grid-template-columns: 1fr 1fr; } }
+
+  .grade-item label {
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .grade-item input { margin-bottom: 0; padding: 0.6rem 0.8rem; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-badge">AI Powered · Thailand 2026</div>
+    <h1>StudyPath AI</h1>
+    <p class="subtitle">ผู้ช่วยนักเรียนไทย — อธิบายโจทย์ & วางแผน TCAS ด้วย AI</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('exam')">
+      <span>📚</span> อธิบายโจทย์
+    </button>
+    <button class="tab" onclick="switchTab('tcas')">
+      <span>🎓</span> วางแผน TCAS
+    </button>
+  </div>
+
+  <!-- Panel 1: Exam Explainer -->
+  <div class="panel active" id="panel-exam">
+    <div class="card">
+      <div class="card-title">📚 AI Exam Explainer</div>
+      <div class="card-desc">วางโจทย์ข้อสอบ → AI อธิบายทีละขั้นตอนเป็นภาษาไทย</div>
+
+      <label>วิชา</label>
+      <div class="chips" id="subjectChips">
+        <span class="chip" onclick="selectChip(this,'subjectChips','คณิตศาสตร์')">🔢 คณิต</span>
+        <span class="chip" onclick="selectChip(this,'subjectChips','ฟิสิกส์')">⚛️ ฟิสิกส์</span>
+        <span class="chip" onclick="selectChip(this,'subjectChips','เคมี')">🧪 เคมี</span>
+        <span class="chip" onclick="selectChip(this,'subjectChips','ชีววิทยา')">🧬 ชีววิทยา</span>
+        <span class="chip" onclick="selectChip(this,'subjectChips','ภาษาอังกฤษ')">🇬🇧 อังกฤษ</span>
+        <span class="chip" onclick="selectChip(this,'subjectChips','ภาษาไทย')">🇹🇭 ไทย</span>
+      </div>
+
+      <label>โจทย์ข้อสอบ</label>
+      <textarea id="examQuestion" placeholder="วางโจทย์ที่นี่... เช่น ถ้า f(x) = 3x² + 2x - 1 จงหา f'(x)"></textarea>
+
+      <label>ระดับ</label>
+      <select id="examLevel">
+        <option value="ม.ต้น">มัธยมต้น (ม.1-3)</option>
+        <option value="ม.ปลาย" selected>มัธยมปลาย (ม.4-6)</option>
+        <option value="มหาวิทยาลัย">มหาวิทยาลัย</option>
+      </select>
+
+      <button class="btn" id="examBtn" onclick="explainExam()">
+        <span id="examBtnContent">✨ ให้ AI อธิบาย</span>
+      </button>
+
+      <div class="result-box" id="examResult">
+        <div class="result-label">คำอธิบายจาก AI</div>
+        <div class="result-content" id="examResultContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 2: TCAS Planner -->
+  <div class="panel" id="panel-tcas">
+    <div class="card">
+      <div class="card-title">🎓 TCAS Planner AI</div>
+      <div class="card-desc">กรอกข้อมูล → AI วางแผน TCAS ทุกรอบ พร้อมประเมินโอกาสติด</div>
+
+      <div class="tcas-steps">
+        <div class="step-row">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-name">Portfolio</div>
+            <div class="step-detail">มี.ค. — คัดจากแฟ้มสะสมงาน</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-name">Quota</div>
+            <div class="step-detail">เม.ย. — คัดจากโควตาภูมิภาค</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-name">Admission</div>
+            <div class="step-detail">พ.ค. — คัดจากคะแนน TGAT/TPAT</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-name">Direct Admission</div>
+            <div class="step-detail">พ.ค. — มหาวิทยาลัยคัดเองโดยตรง</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <label>เกรดเฉลี่ย (GPAX)</label>
+      <input type="number" id="gpax" min="0" max="4" step="0.01" placeholder="เช่น 3.50" />
+
+      <label>คะแนนสอบ</label>
+      <div class="grade-grid">
+        <div class="grade-item">
+          <label>TGAT รวม</label>
+          <input type="number" id="tgat" placeholder="0-150" min="0" max="150" />
+        </div>
+        <div class="grade-item">
+          <label>TPAT</label>
+          <input type="number" id="tpat" placeholder="0-100" min="0" max="100" />
+        </div>
+        <div class="grade-item">
+          <label>A-Level (เฉลี่ย)</label>
+          <input type="number" id="alevel" placeholder="0-100" min="0" max="100" />
+        </div>
+      </div>
+
+      <label>สายที่สนใจ</label>
+      <div class="chips" id="majorChips">
+        <span class="chip" onclick="selectChip(this,'majorChips','วิศวกรรมศาสตร์')">⚙️ วิศวะ</span>
+        <span class="chip" onclick="selectChip(this,'majorChips','แพทยศาสตร์')">🏥 แพทย์</span>
+        <span class="chip" onclick="selectChip(this,'majorChips','วิทยาศาสตร์คอมพิวเตอร์')">💻 คอมพิวเตอร์</span>
+        <span class="chip" onclick="selectChip(this,'majorChips','บริหารธุรกิจ')">📊 บริหาร</span>
+        <span class="chip" onclick="selectChip(this,'majorChips','นิติศาสตร์')">⚖️ นิติ</span>
+        <span class="chip" onclick="selectChip(this,'majorChips','สถาปัตยกรรมศาสตร์')">🏛️ สถาปัตย์</span>
+      </div>
+
+      <label>มหาวิทยาลัยที่สนใจ (ถ้ามี)</label>
+      <input type="text" id="univPref" placeholder="เช่น จุฬา, มหิดล, เกษตร หรือเปิดรับทุกที่" />
+
+      <button class="btn" id="tcasBtn" onclick="planTCAS()">
+        <span id="tcasBtnContent">🗺️ วางแผน TCAS ให้ฉัน</span>
+      </button>
+
+      <div class="result-box" id="tcasResult">
+        <div class="result-label">แผน TCAS จาก AI</div>
+        <div class="result-content" id="tcasResultContent"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const selectedValues = { subjectChips: '', majorChips: '' };
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'exam') || (i === 1 && tab === 'tcas'));
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function selectChip(el, groupId, val) {
+    document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedValues[groupId] = val;
+  }
+
+  function setLoading(type, loading) {
+    const btn = document.getElementById(type + 'Btn');
+    const content = document.getElementById(type + 'BtnContent');
+    btn.disabled = loading;
+    if (loading) {
+      const loader = document.createElement('span');
+      loader.className = 'loader';
+      loader.id = type + 'Loader';
+      content.textContent = ' กำลังวิเคราะห์...';
+      btn.insertBefore(loader, content);
+    } else {
+      const loader = document.getElementById(type + 'Loader');
+      if (loader) loader.remove();
+      content.textContent = type === 'exam' ? '✨ ให้ AI อธิบาย' : '🗺️ วางแผน TCAS ให้ฉัน';
+    }
+  }
+
+  function getApiKey() {
+    let key = localStorage.getItem('claude_api_key');
+    if (!key) {
+      key = prompt('🔑 ใส่ Claude API Key ของคุณ (จาก console.anthropic.com)\nจะถูกบันทึกไว้ในเบราว์เซอร์ ไม่ต้องใส่ซ้ำ:');
+      if (!key) throw new Error('ยังไม่ได้ใส่ API Key');
+      localStorage.setItem('claude_api_key', key.trim());
+    }
+    return key.trim();
+  }
+
+  async function callClaude(prompt) {
+    const apiKey = getApiKey();
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) {
+      if (data.error.type === 'authentication_error') {
+        localStorage.removeItem('claude_api_key');
+        throw new Error('API Key ไม่ถูกต้อง กรุณาลองใหม่');
+      }
+      throw new Error(data.error.message);
+    }
+    return data.content[0].text;
+  }
+
+  async function explainExam() {
+    const question = document.getElementById('examQuestion').value.trim();
+    if (!question) { alert('กรุณาใส่โจทย์ก่อนนะครับ'); return; }
+
+    const subject = selectedValues.subjectChips || 'ทั่วไป';
+    const level = document.getElementById('examLevel').value;
+
+    const prompt = `คุณคือครูผู้ช่วยนักเรียนไทย ระดับ${level} วิชา${subject}
+
+โจทย์: ${question}
+
+กรุณาอธิบายวิธีทำอย่างละเอียดเป็นภาษาไทย โดย:
+1. บอกว่าโจทย์นี้ถามอะไร
+2. อธิบายขั้นตอนการคิดทีละขั้น
+3. แสดงการคำนวณ (ถ้ามี)
+4. สรุปคำตอบ
+5. บอก tip ที่ควรจำสำหรับโจทย์ประเภทนี้
+
+ใช้ภาษาเข้าใจง่าย เหมาะกับนักเรียน${level}`;
+
+    setLoading('exam', true);
+    try {
+      const result = await callClaude(prompt);
+      document.getElementById('examResultContent').textContent = result;
+      document.getElementById('examResult').classList.add('show');
+    } catch (e) {
+      alert('เกิดข้อผิดพลาด: ' + e.message);
+    }
+    setLoading('exam', false);
+  }
+
+  async function planTCAS() {
+    const gpax = document.getElementById('gpax').value;
+    if (!gpax) { alert('กรุณาใส่ GPAX ก่อนนะครับ'); return; }
+
+    const tgat = document.getElementById('tgat').value;
+    const tpat = document.getElementById('tpat').value;
+    const alevel = document.getElementById('alevel').value;
+    const major = selectedValues.majorChips || 'ยังไม่แน่ใจ';
+    const univ = document.getElementById('univPref').value.trim() || 'เปิดรับทุกที่';
+
+    const prompt = `คุณคือที่ปรึกษาการสอบ TCAS ของไทย ผู้เชี่ยวชาญระบบ TCAS ปีล่าสุด
+
+ข้อมูลนักเรียน:
+- GPAX: ${gpax}
+- TGAT: ${tgat || 'ยังไม่มี'}
+- TPAT: ${tpat || 'ยังไม่มี'}
+- A-Level (เฉลี่ย): ${alevel || 'ยังไม่มี'}
+- สายที่สนใจ: ${major}
+- มหาวิทยาลัยที่สนใจ: ${univ}
+
+กรุณาวางแผน TCAS ให้ครบถ้วน โดย:
+1. ประเมินโอกาสสอบติดแต่ละรอบ (Portfolio, Quota, Admission, Direct)
+2. แนะนำว่าควรเน้นรอบไหนมากที่สุด และเหตุผล
+3. แนะนำคณะ/มหาวิทยาลัยที่มีโอกาสติด 3-5 แห่ง
+4. บอกสิ่งที่ควรทำเพิ่มเติมเพื่อเพิ่มโอกาส
+5. คำแนะนำพิเศษสำหรับนักเรียนคนนี้
+
+ตอบเป็นภาษาไทย กระชับ ชัดเจน และให้กำลังใจ`;
+
+    setLoading('tcas', true);
+    try {
+      const result = await callClaude(prompt);
+      document.getElementById('tcasResultContent').textContent = result;
+      document.getElementById('tcasResult').classList.add('show');
+    } catch (e) {
+      alert('เกิดข้อผิดพลาด: ' + e.message);
+    }
+    setLoading('tcas', false);
+  }
+</script>
+</body>
+</html>
